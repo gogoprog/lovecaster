@@ -6,12 +6,14 @@ end
 local camera = {
     position = vector2(0, 0),
     direction = vector2(0, 0),
-    angle = 0
+    angle = 0,
+    hfov = math.pi * 0.25
 }
 local viewport = {
     width = 640,
     height = 480
 }
+local wallH = 300
 
 function love.load()
     love.physics.setMeter(64)
@@ -35,19 +37,34 @@ function love.update(dt)
     if love.keyboard.isDown("escape") then
         love.event.quit()
     elseif love.keyboard.isDown("a") then
-        camera.angle = camera.angle - 1 * dt
+        camera.angle = camera.angle - 3 * dt
     elseif love.keyboard.isDown("d") then
-        camera.angle = camera.angle + 1 * dt
+        camera.angle = camera.angle + 3 * dt
     end
 
     local a = camera.angle
     camera.direction.x = math.cos(a)
     camera.direction.y = math.sin(a)
+    local f = 0
 
     if love.keyboard.isDown("w") then
+        f = 1
+    elseif love.keyboard.isDown("s") then
+        f = -1
+    end
+
+    if love.keyboard.isDown("up") then
+        wallH = wallH + 1
+        print(wallH)
+    elseif love.keyboard.isDown("down") then
+        wallH = wallH - 1
+        print(wallH)
+    end
+
+    if f ~= 0 then
         local p = camera.position
         local d = camera.direction
-        local s = 100
+        local s = 100* f
         p.x = p.x + d.x * dt * s
         p.y = p.y + d.y * dt * s
     end
@@ -78,22 +95,26 @@ end
 
 
 function rayCast()
-    love.graphics.setColor(255, 255, 0)
     local p = camera.position
     local vw = viewport.width
     local vh = viewport.height
+    local farPlane = 1000
+    local d = (vw/2) / math.tan(camera.hfov)
 
     for x=-vw/2,vw/2 do
-        local a2 = math.atan2(x, 500)
+        local a2 = math.atan2(x, d)
         local a = camera.angle + a2
-        local farPlane = 1000
         local dx = math.cos(a) * farPlane
         local dy = math.sin(a) * farPlane
 
         world:rayCast(p.x, p.y, p.x + dx, p.y + dy, function(fixture, tx, ty, xn, yn, fraction)
-            local h = (1 - fraction) * vh * 0.5
+            local h = (1 - fraction) * wallH
             local xx = x + vw/2
-            love.graphics.line(xx, vh/2 + h, xx, vh/2 - h)
+
+            love.graphics.setColor(yn * 255, xn * 255, 0)
+
+            love.graphics.line(xx, vh/2 + h * 0.7, xx, vh/2 - h * 0.3)
+
             return 0
         end)
 
