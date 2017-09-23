@@ -13,7 +13,7 @@ local viewport = {
     width = 640,
     height = 480
 }
-local wallH = 300
+local wallH = 80
 
 function love.load()
     love.physics.setMeter(64)
@@ -84,6 +84,7 @@ function love.draw()
         local d = camera.direction
         love.graphics.line(p.x, p.y, p.x + d.x * s, p.y + d.y * s)
     else
+        love.graphics.setBlendMode("replace")
         love.graphics.setColor(100, 255, 255)
         love.graphics.rectangle("fill", 0, 0, viewport.width, viewport.height / 2)
         love.graphics.setColor(139, 69, 19)
