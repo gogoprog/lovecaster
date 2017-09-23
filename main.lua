@@ -108,12 +108,12 @@ function rayCast()
         local dy = math.sin(a) * farPlane
 
         world:rayCast(p.x, p.y, p.x + dx, p.y + dy, function(fixture, tx, ty, xn, yn, fraction)
-            local h = (1 - fraction) * wallH
+            local h = wallH / fraction
             local xx = x + vw/2
 
             love.graphics.setColor(yn * 255, xn * 255, 0)
 
-            love.graphics.line(xx, vh/2 + h * 0.7, xx, vh/2 - h * 0.3)
+            love.graphics.line(xx, vh/2 + h * 0.3, xx, vh/2 - h * 0.7)
 
             return 0
         end)
