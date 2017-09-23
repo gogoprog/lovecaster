@@ -13,7 +13,7 @@ local viewport = {
     width = 640,
     height = 480
 }
-local wallH = 80
+local wallH = 40
 
 function love.load()
     love.physics.setMeter(64)
