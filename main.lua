@@ -16,6 +16,7 @@ local viewport = {
 local wallH = 40
 
 function love.load()
+    love.window.setTitle("lovecaster")
     love.physics.setMeter(64)
     world = love.physics.newWorld(0, 0, true) 
     objects = {}
@@ -112,7 +113,13 @@ function rayCast()
             local h = wallH / fraction
             local xx = x + vw/2
 
-            love.graphics.setColor(yn * 255, xn * 255, 0)
+            print(xn)
+            print(yn)
+
+            xn = xn * 0.5 + 0.5
+            yn = yn * 0.5 + 0.5
+
+            love.graphics.setColor(yn * 255, xn * 255, 128)
 
             love.graphics.line(xx, vh/2 + h * 0.3, xx, vh/2 - h * 0.7)
 
