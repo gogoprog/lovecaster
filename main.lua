@@ -6,6 +6,7 @@ end
 local camera = {
     position = vector2(0, 0),
     direction = vector2(0, 0),
+    lateral = vector2(0, 0),
     angle = 0,
     hfov = math.pi * 0.25
 }
@@ -14,6 +15,8 @@ local viewport = {
     height = 600
 }
 local wallH = 16
+
+local lastMouseX = 0
 
 function love.load()
     love.window.setTitle("lovecaster")
@@ -24,10 +27,12 @@ function love.load()
     addObject(128, 64, 50, 100)
     addObject(300, 128, 50, 50)
     addObject(64, 300, 10, 500)
+    addObject(64, 300, 500, 10)
+    addObject(200, 400, 500, 10)
 
     love.graphics.setBackgroundColor(0, 0, 0)
     love.window.setMode(viewport.width, viewport.height)
-    camera.position.x = 300
+    camera.position.x = 400
     camera.position.y = 300
 end
 
@@ -36,27 +41,54 @@ function love.update(dt)
 
     if love.keyboard.isDown("escape") then
         love.event.quit()
-    elseif love.keyboard.isDown("a") then
+    elseif love.keyboard.isDown("q") then
         camera.angle = camera.angle - 3 * dt
-    elseif love.keyboard.isDown("d") then
+    elseif love.keyboard.isDown("e") then
         camera.angle = camera.angle + 3 * dt
     end
+
+
+    local mouseX = love.mouse.getX()
+
+    if love.mouse.isDown(1) then
+        local dx = mouseX - lastMouseX
+        camera.angle = camera.angle + dx / 100
+    end
+
+    lastMouseX = mouseX
+
 
     local a = camera.angle
     camera.direction.x = math.cos(a)
     camera.direction.y = math.sin(a)
-    local f = 0
+    camera.lateral.x = math.cos(a + 1.57)
+    camera.lateral.y = math.sin(a + 1.57)
+    local m = vector2(0, 0)
 
     if love.keyboard.isDown("w") then
-        f = 1
+        m.y = 1
     elseif love.keyboard.isDown("s") then
-        f = -1
+        m.y = -1
     end
 
-    if f ~= 0 then
+    if love.keyboard.isDown("d") then
+        m.x = 1
+    elseif love.keyboard.isDown("a") then
+        m.x = -1
+    end
+
+    if m.y ~= 0 then
         local p = camera.position
         local d = camera.direction
-        local s = 100* f
+        local s = 100 * m.y
+        p.x = p.x + d.x * dt * s
+        p.y = p.y + d.y * dt * s
+    end
+
+    if m.x ~= 0 then
+        local p = camera.position
+        local d = camera.lateral
+        local s = 100 * m.x
         p.x = p.x + d.x * dt * s
         p.y = p.y + d.y * dt * s
     end
@@ -79,17 +111,23 @@ function love.draw()
         love.graphics.line(p.x, p.y, p.x + d.x * s, p.y + d.y * s)
     else
         love.graphics.setBlendMode("replace")
-        love.graphics.setColor(100, 255, 255)
-        love.graphics.rectangle("fill", 0, 0, viewport.width, viewport.height / 2)
-        love.graphics.setColor(139, 69, 19)
-        love.graphics.rectangle("fill", 0, viewport.height / 2, viewport.width, viewport.height / 2)
-
-        rayCast()
+        drawSky()
+        drawGround()
+        drawWalls()
     end
 end
 
+function drawSky()
+    love.graphics.setColor(100, 255, 255)
+    love.graphics.rectangle("fill", 0, 0, viewport.width, viewport.height / 2)
+end
 
-function rayCast()
+function drawGround()
+    love.graphics.setColor(139, 69, 19)
+    love.graphics.rectangle("fill", 0, viewport.height / 2, viewport.width, viewport.height / 2)
+end
+
+function drawWalls()
     local p = camera.position
     local vw = viewport.width
     local vh = viewport.height
