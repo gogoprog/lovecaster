@@ -143,6 +143,7 @@ function drawWalls()
         local xn, yn
 
         world:rayCast(p.x, p.y, p.x + dx, p.y + dy, function(fixture, tx, ty, _xn, _yn, fraction)
+            fraction = math.cos(a2) * fraction
             if fraction < minFraction then
                 xn = _xn
                 yn = _yn
