@@ -1,4 +1,4 @@
-local objects
+local objects = {}
 local world
 local function vector2(x, y)
     return {x=x, y=y}
@@ -10,27 +10,26 @@ local camera = {
     hfov = math.pi * 0.25
 }
 local viewport = {
-    width = 640,
-    height = 480
+    width = 800,
+    height = 600
 }
-local wallH = 40
+local wallH = 16
 
 function love.load()
     love.window.setTitle("lovecaster")
     love.physics.setMeter(64)
     world = love.physics.newWorld(0, 0, true) 
     objects = {}
-    objects.ground = {}
-    objects.ground.body = love.physics.newBody(world, 128, 64)
-    objects.ground.shape = love.physics.newRectangleShape(50, 100)
-    objects.ground.fixture = love.physics.newFixture(objects.ground.body, objects.ground.shape)
+
+    addObject(128, 64, 50, 100)
+    addObject(300, 128, 50, 50)
+    addObject(64, 300, 10, 500)
 
     love.graphics.setBackgroundColor(0, 0, 0)
     love.window.setMode(viewport.width, viewport.height)
     camera.position.x = 300
     camera.position.y = 300
 end
-
 
 function love.update(dt)
     world:update(dt)
@@ -54,14 +53,6 @@ function love.update(dt)
         f = -1
     end
 
-    if love.keyboard.isDown("up") then
-        wallH = wallH + 1
-        print(wallH)
-    elseif love.keyboard.isDown("down") then
-        wallH = wallH - 1
-        print(wallH)
-    end
-
     if f ~= 0 then
         local p = camera.position
         local d = camera.direction
@@ -76,7 +67,9 @@ function love.draw()
 
     if love.keyboard.isDown("tab") then
         love.graphics.setColor(72, 160, 14)
-        love.graphics.polygon("fill", objects.ground.body:getWorldPoints(objects.ground.shape:getPoints()))
+        for k, v in ipairs(objects) do
+          love.graphics.polygon("fill", v.body:getWorldPoints(v.shape:getPoints()))
+        end
 
         love.graphics.setColor(255, 255, 255)
         love.graphics.circle("fill", p.x, p.y, 4)
@@ -108,22 +101,36 @@ function rayCast()
         local a = camera.angle + a2
         local dx = math.cos(a) * farPlane
         local dy = math.sin(a) * farPlane
+        local minFraction = 1
+        local xn, yn
 
-        world:rayCast(p.x, p.y, p.x + dx, p.y + dy, function(fixture, tx, ty, xn, yn, fraction)
-            local h = wallH / fraction
+        world:rayCast(p.x, p.y, p.x + dx, p.y + dy, function(fixture, tx, ty, _xn, _yn, fraction)
+            if fraction < minFraction then
+                xn = _xn
+                yn = _yn
+                minFraction = fraction
+            end
+            return 1
+        end)
+
+        if minFraction < 1 then
+            local h = (vh / wallH) / minFraction
             local xx = x + vw/2
 
             xn = xn * 0.5 + 0.5
             yn = yn * 0.5 + 0.5
 
             love.graphics.setColor(yn * 255, xn * 255, 128)
-
             love.graphics.line(xx, vh/2 + h * 0.3, xx, vh/2 - h * 0.7)
-
-            return 0
-        end)
-
+        end
     end
 end
 
+function addObject(x, y, w, h, r)
+    obj = {}
+    obj.body = love.physics.newBody(world, x, y)
+    obj.shape = love.physics.newRectangleShape(w, h)
+    obj.fixture = love.physics.newFixture(obj.body, obj.shape)
 
+    table.insert(objects, obj)
+end
