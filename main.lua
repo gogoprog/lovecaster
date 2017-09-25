@@ -113,9 +113,6 @@ function rayCast()
             local h = wallH / fraction
             local xx = x + vw/2
 
-            print(xn)
-            print(yn)
-
             xn = xn * 0.5 + 0.5
             yn = yn * 0.5 + 0.5
 
