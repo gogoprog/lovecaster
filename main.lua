@@ -14,8 +14,7 @@ local viewport = {
     width = 800,
     height = 600
 }
-local wallH = 16
-local groundCanvas
+local wallH = 26
 local lastMouseX = 0
 
 function love.load()
@@ -34,8 +33,6 @@ function love.load()
     love.window.setMode(viewport.width, viewport.height)
     camera.position.x = 400
     camera.position.y = 300
-
-    groundCanvas = love.graphics.newCanvas(1024, 1024)
 end
 
 function love.update(dt)
@@ -49,7 +46,6 @@ function love.update(dt)
         camera.angle = camera.angle + 3 * dt
     end
 
-
     local mouseX = love.mouse.getX()
 
     if love.mouse.isDown(1) then
@@ -58,7 +54,6 @@ function love.update(dt)
     end
 
     lastMouseX = mouseX
-
 
     local a = camera.angle
     camera.direction.x = math.cos(a)
@@ -94,34 +89,31 @@ function love.update(dt)
         p.x = p.x + d.x * dt * s
         p.y = p.y + d.y * dt * s
     end
+
+    if love.keyboard.isDown("o") then
+        groundV = groundV + 10
+        print("groundV " .. groundV)
+    elseif love.keyboard.isDown("l") then
+        groundV = groundV - 10
+        print("groundV " .. groundV)
+    end
+    if love.keyboard.isDown("i") then
+        groundW = groundW + 10
+        print("groundW " .. groundW)
+    elseif love.keyboard.isDown("k") then
+        groundW = groundW - 10
+        print("groundW " .. groundW)
+    end
 end
 
 function love.draw()
     local p = camera.position
 
-    groundCanvas:renderTo(drawGroundCanvas)
+    love.graphics.setBlendMode("replace")
 
-    if love.keyboard.isDown("tab") then
-        love.graphics.rectangle("fill", 0, 0, 1000, 100)
-        love.graphics.rectangle("fill", 0, 0, 1000, 100)
-        love.graphics.setColor(72, 160, 14)
-        for k, v in ipairs(objects) do
-          love.graphics.polygon("fill", v.body:getWorldPoints(v.shape:getPoints()))
-        end
-
-        love.graphics.setColor(255, 255, 255)
-        love.graphics.circle("fill", p.x, p.y, 4)
-
-        local s = 10
-        local d = camera.direction
-        love.graphics.line(p.x, p.y, p.x + d.x * s, p.y + d.y * s)
-
-    else
-        love.graphics.setBlendMode("replace")
-        drawSky()
-        drawGround()
-        drawWalls()
-    end
+    drawSky()
+    drawGround()
+    drawWalls()
 end
 
 function drawSky()
@@ -129,26 +121,9 @@ function drawSky()
     love.graphics.rectangle("fill", 0, 0, viewport.width, viewport.height / 2)
 end
 
-function drawGroundCanvas()
-    love.graphics.push()
-    love.graphics.clear()
-    love.graphics.translate(camera.position.x, camera.position.y)
-    love.graphics.rotate(camera.angle)
-    love.graphics.setColor(139, 69, 19)
-    love.graphics.rectangle("fill", 0, 0, 1000, 100)
-    love.graphics.pop()
-end
-
 function drawGround()
-    love.graphics.setColor(139, 69, 19)
-    love.graphics.rectangle("fill", 0, viewport.height / 2, viewport.width, viewport.height / 2)
-
-    local vw = viewport.width
-    local vh = viewport.height
-
-    for y=vy/2,vy do
-
-    end
+    love.graphics.setColor(100, 55, 55)
+    love.graphics.rectangle("fill", 0, viewport.height/2, viewport.width, viewport.height / 2)
 end
 
 function drawWalls()
